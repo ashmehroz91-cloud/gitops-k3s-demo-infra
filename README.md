@@ -1,34 +1,70 @@
 # gitops-k3s-demo-infra
 
-This repo provisions a local k3s single-node cluster and installs ArgoCD.
+This repo provisions a local single-node k3s cluster and installs ArgoCD.
 
-Quick scripted flow (recommended):
+## What this repo is for
+
+The client clones this repo to create and destroy the Kubernetes layer locally.
+
+## Tools to install
+
+Required:
+- Git
+- Terraform 1.0+
+- kubectl
+- k3s
+- sudo access on the laptop
+
+Optional:
+- Helm 3
+- ArgoCD CLI
+
+## Quick start
 
 ```bash
-cd /home/usman/Desktop/gitops-k3s-demo-infra
+cd /path/to/gitops-k3s-demo-infra
 chmod +x scripts/*.sh infra/scripts/*.sh
 ./scripts/up.sh
 ```
 
-Manual Terraform flow (if you prefer to run Terraform yourself):
+This will:
+- run Terraform
+- install k3s
+- write the kubeconfig
+- install ArgoCD
+
+## Check the cluster
 
 ```bash
-cd infra/terraform
-terraform init
-terraform plan
-terraform apply -auto-approve
-terraform output -raw kubeconfig_path
-export KUBECONFIG=$(terraform output -raw kubeconfig_path)
-# then install ArgoCD manually if desired:
-kubectl create namespace argocd || true
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+export KUBECONFIG="/path/to/gitops-k3s-demo-infra/infra/kubeconfig.yaml"
+kubectl get nodes
+kubectl get pods -n argocd
 ```
 
-Teardown:
+## Access ArgoCD dashboard
 
 ```bash
-cd /home/usman/Desktop/gitops-k3s-demo-infra
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+Then open:
+
+```text
+https://localhost:8080
+```
+
+Username: `admin`
+
+Get the password with:
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d; echo
+```
+
+## Destroy
+
+```bash
+cd /path/to/gitops-k3s-demo-infra
 ./scripts/down.sh
 ```
-# gitops-k3s-demo-infra
-Terraform and provisioning scripts to create/destroy the k3s cluster and install ArgoCD.
