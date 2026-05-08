@@ -42,6 +42,7 @@ sudo apt update && sudo apt install -y gnupg software-properties-common curl
     https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
     sudo apt update
    sudo apt install terraform
+   if not install with apt use snap :    sudo snapminstall terraform --classic
    terraform -version
   terraform -install-autocomplete
  sudo apt update && sudo apt upgrade terraform
@@ -57,12 +58,7 @@ kubectl version --client
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 helm version
 
-# ArgoCD CLI (optional)
-curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
-rm argocd-linux-amd64
-argocd version --client
-```
+
 
 The k3s installation from this repo must run on Linux, so Windows and macOS users should run commands inside the Linux VM.
 
@@ -89,34 +85,7 @@ kubectl get nodes
 kubectl get pods -n argocd
 ```
 
-## Deploy the app later
 
-Once the cluster is ready, use the manifests repo to deploy the demo app:
-
-Hint: this demo uses DockerHub images under username `ashmehroz1`.
-
-```bash
-## You have run these commands in your root directory :--> gitops-k3s-demo-manifests-
-export KUBECONFIG="../gitops-k3s-demo-infra/infra/kubeconfig.yaml"
-helm upgrade --install gitops-app charts/app -n default --create-namespace -f charts/app/values.yaml
-```
-
-## Access ArgoCD dashboard
-
-```bash
-## You have run these commands in your root directory :--> gitops-k3s-demo-infra
-kubectl port-forward svc/argocd-server -n argocd 8081:443
-```
-
-Then open:
-
-```text
-https://localhost:8081
-```
-
-Username: `admin`
-
-Get the password with: Yu5bdm2v8Dqubgwi
 
 
 ```bash
@@ -126,14 +95,6 @@ kubectl --kubeconfig="$KUBECONFIG" cluster-info
 kubectl --kubeconfig="$KUBECONFIG" get ns
 ```
 
-## Stop access to the dashboard
-
-If you started a port-forward, stop it with `Ctrl+C` or kill the process:
-
-```bash
-## You have run these commands in your root directory :--> gitops-k3s-demo-infra
-pkill -f "kubectl port-forward" || true
-```
 
 ## Destroy
 
@@ -142,11 +103,3 @@ pkill -f "kubectl port-forward" || true
 ./scripts/down.sh
 ```
 
-## Full stop order
-
-For a clean shutdown:
-
-1. Stop any `kubectl port-forward` sessions.
-2. Uninstall the app from the manifests repo if it is deployed with Helm or ArgoCD.
-3. Run `./scripts/down.sh`.
-4. If needed, remove k3s with the host uninstall script.
