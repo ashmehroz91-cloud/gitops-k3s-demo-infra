@@ -85,9 +85,6 @@ kubectl get nodes
 kubectl get pods -n argocd
 ```
 
-
-
-
 ```bash
 ## You have run these commands in your root directory :--> gitops-k3s-demo-infra
 export KUBECONFIG="infra/kubeconfig.yaml"
@@ -96,10 +93,5 @@ kubectl --kubeconfig="$KUBECONFIG" get ns
 ```
 
 
-## Destroy
 
-```bash
-## You have run these commands in your root directory :--> gitops-k3s-demo-infra
-./scripts/down.sh
-```
 
